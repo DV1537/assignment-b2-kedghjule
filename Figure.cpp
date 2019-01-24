@@ -3,8 +3,24 @@
 #include "Shape.h"
 #include "Bound.h"
 
+Figure::~Figure(){
+    for(int i = 0; i < n; i++){
+        delete shapes[i];
+    }
+}
+
 void Figure::addShape(Shape* s){
-    shapes = addToArray(shapes, n, s);
+    Shape** tmp = new Shape*[n+1];
+
+    for(int i = 0; i < n; i++){
+        tmp[i] = nullptr;
+        tmp[i] = shapes[i];
+    }
+    tmp[n] = s;
+
+    shapes = nullptr;
+    shapes = tmp;
+
     n++;
 }
 
@@ -53,18 +69,81 @@ Bound Figure::getBoundingBox(){
     return b;
 }
 
-Shape** Figure::addToArray(Shape** array, int bufferSize, Shape* value){
-    if(array == nullptr){
-        //If array is empty, create first slot and add the value
-        return new Shape*[1] {value};
-    }else{
-        Shape** buffer = new Shape*[bufferSize + 1];
-        
-        for(int i = 0; i < bufferSize; i++){
-            buffer[i] = array[i];
-        }
-        buffer[bufferSize] = value;
-        
-        return buffer;
+Shape** Figure::getClosest(Shape* location, int n){
+    //Generate list of Shape Distances
+    shapeDist* listOfDistances = new shapeDist[this->n];
+    for(int k = 0; k < this->n; k++){
+        shapeDist dist = shapeDist();
+        dist.s = shapes[k];
+        dist.d = shapes[k]->distance(location);
+        listOfDistances[k] = dist;
     }
+    
+    quickSort(listOfDistances, 0, (this->n-1));
+
+    //List should be complete and sorted
+
+    Shape** result = new Shape*[n];
+    int i = 0;
+    int r = 0;
+    while(r < n){
+        if(listOfDistances[i].d == 0){
+            i++;
+        }else{    
+            result[r] = listOfDistances[i].s;
+            i++;
+            r++;
+        }
+    }
+
+    //Clean up
+    delete[] listOfDistances;
+
+    return result;
 }
+
+//Recursive sorting
+//######################################################
+//Source code: https://www.geeksforgeeks.org/quick-sort/
+//######################################################
+
+void Figure::swap(shapeDist& a, shapeDist& b) 
+{ 
+    shapeDist t = a; 
+    a = b; 
+    b = t; 
+} 
+
+int Figure::partition (shapeDist arr[], int low, int high) 
+{ 
+    shapeDist pivot = arr[high];    // pivot 
+    int i = (low - 1);  // Index of smaller element 
+  
+    for (int j = low; j <= high- 1; j++) 
+    { 
+        // If current element is smaller than or 
+        // equal to pivot 
+        if (arr[j].d <= pivot.d) 
+        { 
+            i++;    // increment index of smaller element 
+            swap(arr[i],arr[j]); 
+        } 
+    } 
+    swap(arr[i + 1], arr[high]); 
+    return (i + 1); 
+} 
+
+void Figure::quickSort(shapeDist arr[], int low, int high) 
+{ 
+    if (low < high) 
+    { 
+        /* pi is partitioning index, arr[p] is now 
+           at right place */
+        int pi = partition(arr, low, high); 
+  
+        // Separately sort elements before 
+        // partition and after partition 
+        quickSort(arr, low, pi - 1); 
+        quickSort(arr, pi + 1, high); 
+    } 
+} 

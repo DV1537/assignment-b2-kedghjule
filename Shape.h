@@ -13,7 +13,7 @@ class Shape{
         virtual double circumference() = 0;
         virtual Point position() = 0;
         bool isConvex();
-        double distance(Shape& s);
+        double distance(Shape* s);
 
         virtual Point* getPoints() = 0;
         virtual int getCount() = 0;

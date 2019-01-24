@@ -14,7 +14,6 @@
 using namespace std;
 
 Point* addToArray(Point* array, int bufferSize, Point value);
-Shape** addToArray(Shape** array, int bufferSize, Shape* value);
 
 int main(int argc, const char * argv[])
 {
@@ -23,17 +22,17 @@ int main(int argc, const char * argv[])
     int p = 0; //Sub buffer count
     int s = 0; //Total buffer count
 
+    Figure f1 = Figure();
+
     double iX = 0;
     double iY = 0;
-
-    const int numberOfShapes = 2; //Number of shapes to load
-
-	Polygon* newShape = new Polygon[numberOfShapes];
 
     Point cPnt;
 
     ifstream myReadFile;
     myReadFile.open(argv[1]);
+
+    Polygon endPoly;
 
     if(myReadFile.is_open() == false || argc < 2){
         return EXIT_FAILURE;
@@ -65,26 +64,27 @@ int main(int argc, const char * argv[])
 		        c++;
             }
 
-            Polygon thisShape = Polygon(subBuffer, p);
-            newShape[s] = thisShape;
-            s++;
+            Polygon* thisShape = new Polygon(subBuffer, p);
+            f1.addShape(thisShape);
+            endPoly = *thisShape;
         }    
         myReadFile.close();
 
-        Polygon p1 = newShape[0];
-        Polygon p2 = newShape[1];
 
         //Usage of classes and testing
 
-        Figure f1 = Figure();
+        //Get batch of shapes depending on distance to endPoly which is the last loaded polygon
+        const int numberOfDistancesWeWant = 4;
+        Shape** getBatch = f1.getClosest(&endPoly, numberOfDistancesWeWant);
 
-        f1.addShape(&p1);
-        f1.addShape(&p2);
 
-        cout << f1.getBoundingBox() << endl;
+        //For demonstrating purposes
+        for(int b = 0; b < numberOfDistancesWeWant; b++){
+            cout << "Shape [" << (b+1) << "] with distance " << getBatch[b]->distance(&endPoly) << " at memory adress " << getBatch[b] << endl; 
+        }
+
 
         //Clean up memory
-        delete[] newShape;
     }
     return 0;
 }

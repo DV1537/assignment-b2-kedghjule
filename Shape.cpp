@@ -6,6 +6,6 @@
 
 //Extended methods
 
-double Shape::distance(Shape& s){
-    return sqrt(pow(position().getX() - s.position().getX(),2) + pow(position().getY() - s.position().getY(),2));
+double Shape::distance(Shape* s){
+    return sqrt(pow(position().getX() - s->position().getX(),2) + pow(position().getY() - s->position().getY(),2));
 }
